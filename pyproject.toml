@@ -10,7 +10,8 @@ dependencies = [
     "bs4>=0.0.2",
     "black>=25.1.0",
     "isort>=6.0.1",
-    "pydocstyle>=6.3.0"
+    "pydocstyle>=6.3.0",
+    "pandas>=2.3.2"
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
