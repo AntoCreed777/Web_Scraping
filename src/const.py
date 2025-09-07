@@ -14,5 +14,7 @@ class AppSettings:
         """Devuelve el enlace completo para la sección de series de TV."""
         return self.base_url + "series-tv/"
 
+    nombre_archivo_pkl: str = "series_tv.pkl"
+
 
 settings = AppSettings()
