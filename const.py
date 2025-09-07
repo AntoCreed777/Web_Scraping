@@ -7,7 +7,7 @@ class AppSettings:
 
     @property
     def series_tv_link(self):
-        return self.base_url + "/series-tv/"
+        return self.base_url + "series-tv/"
 
 
 settings = AppSettings()
