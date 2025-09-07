@@ -18,6 +18,16 @@ class DatosSerie:
     cantidad_episodios_totales: Optional[int] = None
     donde_ver: Optional[list[str]] = field(default_factory=list)
 
+    def to_dict(self):
+        """Convierte el objeto DatosSerie en un diccionario usando los campos del dataclass."""
+        result = {}
+        for field in self.__dataclass_fields__:
+            value = getattr(self, field)
+            if field == "sub_generos" or field == "donde_ver":
+                value = ", ".join(value) if value else None
+            result[field] = value
+        return result
+
     def __str__(self):
         """Representación en texto de los datos de la serie."""
         return (

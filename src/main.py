@@ -1,12 +1,17 @@
 """Script principal para el scraping de series de TV desde Sensacine."""
 
+import logging
+import pickle
 from urllib.parse import urljoin
 
+import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from src.const import settings
-from src.datos_serie import DatosSerie
+from const import settings
+from datos_serie import DatosSerie
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def get_soup(link: str) -> BeautifulSoup:
@@ -163,14 +168,46 @@ def extraer_datos_de_series(series: list[DatosSerie]):
     """
     for serie in series:
         extraer_datos_de_serie(serie=serie)
-        print(serie)
+        logging.info(serie)
+
+
+def datos_series_a_dataframe(series: list[DatosSerie]) -> pd.DataFrame:
+    """Convierte una lista de DatosSerie en un DataFrame de pandas."""
+    data = []
+    for s in series:
+        data.append(s.to_dict())
+    df = pd.DataFrame(data)
+    return df
+
+
+def limpiar_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """Realiza limpieza básica del DataFrame usando los campos del dataclass."""
+    for field in DatosSerie.__dataclass_fields__:
+        if field == "titulo" or field == "genero":
+            df[field] = df[field].fillna("Desconocido")
+        elif field == "cantidad_temporadas" or field == "cantidad_episodios_totales":
+            df[field] = df[field].fillna(0).astype(int)
+        elif field == "donde_ver":
+            df[field] = df[field].fillna("No disponible")
+    return df
+
+
+def guardar_dataframe_pickle(df: pd.DataFrame, filename: str):
+    """Guarda el DataFrame en un archivo pickle."""
+    with open(filename, "wb") as f:
+        pickle.dump(df, f)
 
 
 def main():
     """Función principal del script. Orquesta el scraping y muestra resultados."""
     series: list[DatosSerie] = buscar_links_de_series(soup=get_soup(link=settings.series_tv_link))
-
     extraer_datos_de_series(series)
+    df = datos_series_a_dataframe(series)
+    df = limpiar_dataframe(df)
+
+    nombre_archivo = "series_tv.pkl"
+    guardar_dataframe_pickle(df, nombre_archivo)
+    logging.info(f"Datos guardados en {nombre_archivo}. Total de series: {len(df)}")
 
 
 if __name__ == "__main__":
