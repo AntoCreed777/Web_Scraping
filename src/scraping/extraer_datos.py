@@ -3,7 +3,6 @@
 import logging
 
 from bs4 import BeautifulSoup
-
 from datos_serie import DatosSerie
 from request import get_soup
 

@@ -4,7 +4,6 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
-
 from const import settings
 from datos_serie import DatosSerie
 

@@ -8,7 +8,6 @@ from data_frame import (
     guardar_dataframe_pickle,
     limpiar_dataframe,
 )
-from datos_serie import DatosSerie
 from extraer_datos import extraer_datos_de_series
 from request import buscar_links_de_series, get_soup
 
@@ -17,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 def main():
     """Función principal del script. Orquesta el scraping y muestra resultados."""
-    series: list[DatosSerie] = buscar_links_de_series(soup=get_soup(link=settings.series_tv_link))
+    series = buscar_links_de_series(soup=get_soup(link=settings.series_tv_link))
     extraer_datos_de_series(series)
     df = datos_series_a_dataframe(series)
     df = limpiar_dataframe(df)
