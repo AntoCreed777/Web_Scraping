@@ -1,13 +1,26 @@
+"""Script principal para el scraping de series de TV desde Sensacine."""
+
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
-from const import settings
-from datos_serie import DatosSerie
+from src.const import settings
+from src.datos_serie import DatosSerie
 
 
 def get_soup(link: str) -> BeautifulSoup:
+    """Obtiene y parsea el contenido HTML de un enlace usando BeautifulSoup.
+
+    Args:
+        link (str): URL a consultar.
+
+    Returns:
+        BeautifulSoup: Objeto parseado del HTML.
+
+    Raises:
+        ValueError: Si ocurre un error en la petición HTTP.
+    """
     try:
         r = requests.get(link)
         r.raise_for_status()
@@ -18,12 +31,19 @@ def get_soup(link: str) -> BeautifulSoup:
 
 
 def buscar_links_de_series(soup: BeautifulSoup) -> list[DatosSerie]:
+    """Busca y retorna los links y títulos de series en el HTML dado.
+
+    Args:
+        soup (BeautifulSoup): HTML parseado de la página principal.
+
+    Returns:
+        list[DatosSerie]: Lista de objetos DatosSerie con link y título.
+    """
     # Busca los contenedores de películas.
     peliculas = soup.find_all("li", class_="mdl")
     datos_serie = []
 
     for peli in peliculas:
-        # Buscar el <a> dentro de <h2> con clase 'meta-title-link'
         link = peli.find("a", class_="meta-title-link")
 
         if link:
@@ -36,6 +56,14 @@ def buscar_links_de_series(soup: BeautifulSoup) -> list[DatosSerie]:
 
 
 def extraer_generos(info) -> list[str]:
+    """Extrae los géneros de una serie desde el bloque de información.
+
+    Args:
+        info (BeautifulSoup): Bloque HTML con información de la serie.
+
+    Returns:
+        list[str]: Lista de géneros encontrados.
+    """
     div = info.find("div", class_="meta-body-info")
     if not div:
         return []
@@ -45,6 +73,14 @@ def extraer_generos(info) -> list[str]:
 
 
 def extraer_titulo_original(info) -> str | None:
+    """Extrae el título original de la serie si está disponible.
+
+    Args:
+        info (BeautifulSoup): Bloque HTML con información de la serie.
+
+    Returns:
+        str | None: Título original o None si no existe.
+    """
     div = info.find("div", class_="meta-body-original-title")
     if not div:
         return None
@@ -53,6 +89,14 @@ def extraer_titulo_original(info) -> str | None:
 
 
 def extraer_cantidad_temporadas_y_episodios(soup: BeautifulSoup) -> list[int] | None:
+    """Extrae la cantidad de temporadas y episodios de la serie.
+
+    Args:
+        soup (BeautifulSoup): HTML parseado de la página de la serie.
+
+    Returns:
+        list[int] | None: [temporadas, episodios] o None si no se encuentra.
+    """
     info_serie_stats = soup.find("div", class_="stats-numbers-seriespage")
     if not info_serie_stats:
         return None
@@ -65,6 +109,14 @@ def extraer_cantidad_temporadas_y_episodios(soup: BeautifulSoup) -> list[int] | 
 
 
 def extraer_donde_ver(soup: BeautifulSoup) -> list[str] | None:
+    """Extrae las plataformas donde se puede ver la serie.
+
+    Args:
+        soup (BeautifulSoup): HTML parseado de la página de la serie.
+
+    Returns:
+        list[str] | None: Lista de plataformas o None si no hay datos.
+    """
     div = soup.find_all("div", class_="provider-tile-primary")
     if not div:
         return None
@@ -73,6 +125,11 @@ def extraer_donde_ver(soup: BeautifulSoup) -> list[str] | None:
 
 
 def extraer_datos_de_serie(serie: DatosSerie):
+    """Extrae y asigna todos los datos relevantes de una serie.
+
+    Args:
+        serie (DatosSerie): Objeto DatosSerie a completar.
+    """
     soup = get_soup(link=serie.link)
 
     # Extraer Genero y Sub-Genero
@@ -99,12 +156,18 @@ def extraer_datos_de_serie(serie: DatosSerie):
 
 
 def extraer_datos_de_series(series: list[DatosSerie]):
+    """Itera sobre una lista de series y extrae sus datos.
+
+    Args:
+        series (list[DatosSerie]): Lista de series a procesar.
+    """
     for serie in series:
         extraer_datos_de_serie(serie=serie)
         print(serie)
 
 
 def main():
+    """Función principal del script. Orquesta el scraping y muestra resultados."""
     series: list[DatosSerie] = buscar_links_de_series(soup=get_soup(link=settings.series_tv_link))
 
     extraer_datos_de_series(series)

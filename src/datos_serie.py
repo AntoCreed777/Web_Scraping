@@ -1,9 +1,13 @@
+"""Definición de la clase DatosSerie para almacenar información de series de TV."""
+
 from dataclasses import dataclass, field
 from typing import Optional
 
 
 @dataclass
 class DatosSerie:
+    """Modelo de datos para almacenar información relevante de una serie de TV."""
+
     link: str
 
     titulo: Optional[str] = None
@@ -15,6 +19,7 @@ class DatosSerie:
     donde_ver: Optional[list[str]] = field(default_factory=list)
 
     def __str__(self):
+        """Representación en texto de los datos de la serie."""
         return (
             f"Título: {self.titulo or 'Desconocido'}\n"
             f"Título original: {self.titulo_original or 'Desconocido'}\n"
