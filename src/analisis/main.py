@@ -345,6 +345,64 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
     )
 
 
+###
+# En base a tu analisis ¿Que serie de animación reciente
+# recomendarias a un fan de la acción?
+# ¿Para un fan de la comedia?
+def respuesta_recomendacion(df):
+    GENEROS_SPLIT = "generos_split"
+    # Separar los géneros en listas
+    df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
+    # Explode para tener una fila por cada género
+    df_exploded = df.explode(GENEROS_SPLIT)
+    # Limpiar espacios extra
+    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+
+    # Filtrar series de animación emitidas en el último año (2025)
+    df_animacion_2025 = df_exploded[
+        (df_exploded[GENEROS_SPLIT] == "Animación")
+        & (df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value] == 2025)
+    ]
+
+    # Buscar series que también tengan Acción
+    df_accion = df_animacion_2025[
+        df_animacion_2025[SerieColumn.GENEROS.value].str.contains("Acción")
+    ]
+
+    # Buscar series que también tengan Comedia
+    df_comedia = df_animacion_2025[
+        df_animacion_2025[SerieColumn.GENEROS.value].str.contains("Comedia")
+    ]
+
+    # Ordenar por puntaje descendente
+    df_accion_sorted = df_accion.sort_values(by=SerieColumn.PUNTUACION.value, ascending=False)
+    df_comedia_sorted = df_comedia.sort_values(by=SerieColumn.PUNTUACION.value, ascending=False)
+
+    # Mostrar recomendación para fans de acción
+    imprimir_data_frame(
+        df_accion_sorted,
+        mensaje="Recomendación de series de animación recientes para fans de la acción (ordenadas por puntaje):",
+        columnas=[
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.FECHA_EMISION_ULTIMA.value,
+            SerieColumn.DONDE_VER.value,
+        ],
+    )
+
+    # Mostrar recomendación para fans de comedia
+    imprimir_data_frame(
+        df_comedia_sorted,
+        mensaje="Recomendación de series de animación recientes para fans de la comedia (ordenadas por puntaje):",
+        columnas=[
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.FECHA_EMISION_ULTIMA.value,
+            SerieColumn.DONDE_VER.value,
+        ],
+    )
+
+
 def main():
     df = importar_data_frame()
 
@@ -354,9 +412,8 @@ def main():
     # respuesta_puntaje_generos_estadisticas(df)
     # respuesta_series_puntuacion_en_limites(df)
     # respuesta_mejor_plataforma_streaming(df)
-    respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
-
-    imprimir_data_frame(df, mensaje="asd")
+    # respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
+    respuesta_recomendacion(df)
 
 
 if __name__ == "__main__":
