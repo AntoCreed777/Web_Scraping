@@ -260,7 +260,45 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
 # ¿Cúal es la plataforma de streaming que vale la pena contratar
 # según calidad/cantidad de series de acuerdo con los datos de Sensacine?
 def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
-    pass
+    DONDE_VER_SPLIT = "donde_ver_split"
+
+    # Separar los servicios en listas
+    df[DONDE_VER_SPLIT] = df[SerieColumn.DONDE_VER.value].str.split(",")
+
+    # Explode para tener una fila por cada servicio
+    df_exploded = df.explode(DONDE_VER_SPLIT)
+
+    # Limpiar espacios extra
+    df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
+
+    # Se agrupa por Servicio de Streaming
+    df_agrupado = df_exploded.groupby(DONDE_VER_SPLIT)
+
+    # Calcular cantidad de series
+    cantidad_series = df_agrupado[SerieColumn.TITULO.value].count()
+
+    # Calcular puntaje promedio por servicio
+    puntaje_por_servicio = df_agrupado[SerieColumn.PUNTUACION.value].mean()
+
+    # Calcular índice combinado
+    indice_calidad_cantidad = puntaje_por_servicio * cantidad_series
+
+    # Crear la tabla
+    tabla = pd.DataFrame(
+        {
+            "Streaming": cantidad_series.index,
+            "Cantidad de series": cantidad_series.values,
+            "Puntaje promedio": puntaje_por_servicio.values,
+            "Índice calidad*cantidad": indice_calidad_cantidad.values,
+        }
+    )
+
+    # Ordenar por índice combinado (puedes cambiar por 'Puntaje promedio' si prefieres)
+    tabla = tabla.sort_values(by="Índice calidad*cantidad", ascending=False)
+
+    imprimir_data_frame(
+        tabla, mensaje="Mejor plataforma de streaming según calidad/cantidad de series:"
+    )
 
 
 def main():
