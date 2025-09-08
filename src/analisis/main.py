@@ -26,11 +26,12 @@ def respuesta_donde_ver(df: pd.DataFrame):
     # Limpiar espacios extra
     df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
 
-    print(df_exploded[DONDE_VER_SPLIT].unique())
-
     # Contar cuántas series hay por cada servicio
     conteo = df_exploded[DONDE_VER_SPLIT].value_counts()
-    print(conteo)
+
+    tabla = conteo.reset_index()
+    tabla.columns = ["Servicio", "Cantidad"]
+    print(tabla.to_markdown(index=False))
 
 
 def respuesta_generos(df: pd.DataFrame):
@@ -58,12 +59,43 @@ def respuesta_generos(df: pd.DataFrame):
     plt.savefig("distribucion_generos.png")
 
 
+def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
+    # Filtrar series con más de 2 temporadas
+    df_filtrado = df[df[SerieColumn.CANTIDAD_TEMPORADAS.value] > 2]
+
+    # Seleccionar columnas relevantes
+    columnas = [
+        SerieColumn.TITULO.value,
+        SerieColumn.PUNTUACION.value,
+        SerieColumn.CANTIDAD_TEMPORADAS.value,
+        SerieColumn.CANTIDAD_EPISODIOS_TOTALES.value,
+    ]
+    df_seleccion = df_filtrado[columnas]
+
+    # Ordenar por puntaje descendente y tomar los 30 primeros
+    df_top = df_seleccion.sort_values(by=SerieColumn.PUNTUACION.value, ascending=False).head(30)
+
+    # Renombrar columnas para la tabla
+    df_top = df_top.rename(
+        columns={
+            SerieColumn.TITULO.value: "Nombre",
+            SerieColumn.PUNTUACION.value: "Puntaje de usuarios",
+            SerieColumn.CANTIDAD_TEMPORADAS.value: "Temporadas",
+            SerieColumn.CANTIDAD_EPISODIOS_TOTALES.value: "Episodios",
+        }
+    )
+
+    print(df_top.to_markdown(index=False))
+
+
 def main():
     df = importar_data_frame()
 
     respuesta_donde_ver(df)
 
     respuesta_generos(df)
+
+    respuesta_series_con_mas_temporadas_puntaje(df)
 
 
 if __name__ == "__main__":
