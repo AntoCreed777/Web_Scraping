@@ -138,7 +138,10 @@ def extraer_datos_de_serie(serie: DatosSerie):
     Args:
         serie (DatosSerie): Objeto DatosSerie a completar.
     """
-    soup = get_soup(link=serie.link)
+    try:
+        soup = get_soup(link=serie.link)
+    except:
+        return
 
     # Extraer Genero y Sub-Genero
     info_serie = soup.find("div", class_="meta-body")

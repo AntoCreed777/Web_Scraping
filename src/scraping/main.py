@@ -19,9 +19,13 @@ def main():
     series = []
     link_paginas_a_buscar_base = settings.series_tv_link + "?page="
     contador_paginas = 1
+    limite_de_paginas_a_analizar = 150
     series_en_pagina_anterior = None
 
     while True:
+        if contador_paginas == limite_de_paginas_a_analizar + 1:
+            break
+
         logging.info(f"Se va a leer la pagina {contador_paginas}.")
         link_pagina_a_buscar_actual = link_paginas_a_buscar_base + str(contador_paginas)
 
