@@ -14,7 +14,7 @@ def importar_data_frame() -> pd.DataFrame:
     return pd.read_pickle(settings.nombre_archivo_pkl)
 
 
-def imprimir_data_frame(df: pd.DataFrame, columnas: list[str] | None = None):
+def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: list[str] | None = None):
     """
     Imprime el DataFrame en formato tabla markdown.
     Si se especifica una lista de columnas, solo muestra esas columnas.
@@ -22,7 +22,7 @@ def imprimir_data_frame(df: pd.DataFrame, columnas: list[str] | None = None):
     if columnas is not None:
         df = df[columnas]
 
-    print("\nData Frame")
+    print(f"\n{mensaje}")
     print(df.to_markdown(index=False))
 
 
@@ -43,7 +43,7 @@ def respuesta_donde_ver(df: pd.DataFrame):
 
     tabla = conteo.reset_index()
     tabla.columns = ["Servicio", "Cantidad"]
-    print(tabla.to_markdown(index=False))
+    imprimir_data_frame(tabla, mensaje="Tabla de cantidad de series por servicio de streaming:")
 
 
 def respuesta_generos(df: pd.DataFrame):
@@ -60,6 +60,10 @@ def respuesta_generos(df: pd.DataFrame):
 
     # Contar cuántas veces aparece cada género
     conteo_generos = df_exploded[GENEROS_SPLIT].value_counts()
+
+    tabla_generos = conteo_generos.reset_index()
+    tabla_generos.columns = ["Género", "Cantidad"]
+    imprimir_data_frame(tabla_generos, mensaje="Tabla de cantidad de series por género:")
 
     # Graficar la distribución de géneros
     conteo_generos.plot(kind="bar", figsize=(12, 6))
@@ -97,7 +101,9 @@ def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
         }
     )
 
-    print(df_top.to_markdown(index=False))
+    imprimir_data_frame(
+        df_top, mensaje="Tabla de series con más de 2 temporadas y mayor puntaje de usuarios:"
+    )
 
 
 def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
@@ -123,8 +129,7 @@ def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
         }
     )
 
-    print("\nTabla de puntaje promedio por género:")
-    print(tabla.to_markdown(index=False))
+    imprimir_data_frame(tabla, mensaje="Tabla de puntaje promedio por género:")
 
     # Seleccionar géneros con mayor y menor puntaje promedio
     top3 = puntaje_por_genero.sort_values(ascending=False).head(3)
@@ -179,8 +184,9 @@ def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
         }
     )
 
-    print("\nTabla de servicios de streaming, cantidad de series y puntaje promedio:")
-    print(tabla.to_markdown(index=False))
+    imprimir_data_frame(
+        tabla, mensaje="Tabla de servicios de streaming, cantidad de series y puntaje promedio:"
+    )
 
 
 ###
@@ -192,7 +198,7 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
     # Filtrar por puntaje
     df_filtrado = df[
         (df[SerieColumn.PUNTUACION.value] >= 3.5) & (df[SerieColumn.PUNTUACION.value] <= 5)
-    ]
+    ].copy()
 
     GENEROS_SPLIT = "generos_split"
     df_filtrado[GENEROS_SPLIT] = df_filtrado[SerieColumn.GENEROS.value].str.split(",")
@@ -214,9 +220,9 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
         & (df_exploded[SerieColumn.DONDE_VER.value] != "")
     ]
 
-    # Mostrar tabla
     imprimir_data_frame(
         df_exploded,
+        mensaje="Tabla de series con puntuación entre 3.5 y 5, género Drama, 2+ temporadas, terminadas y disponibles en streaming:",
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
@@ -230,10 +236,10 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
 def main():
     df = importar_data_frame()
 
-    # respuesta_donde_ver(df)
-    # respuesta_generos(df)
-    # respuesta_series_con_mas_temporadas_puntaje(df)
-    # respuesta_puntaje_generos_estadisticas(df)
+    respuesta_donde_ver(df)
+    respuesta_generos(df)
+    respuesta_series_con_mas_temporadas_puntaje(df)
+    respuesta_puntaje_generos_estadisticas(df)
     respuesta_series_puntuacion_en_limites(df)
 
 
