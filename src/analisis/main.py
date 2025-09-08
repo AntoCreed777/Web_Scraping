@@ -1,6 +1,7 @@
 import os
 import sys
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
@@ -47,12 +48,14 @@ def respuesta_generos(df: pd.DataFrame):
     # Contar cuántas veces aparece cada género
     conteo_generos = df_exploded[GENEROS_SPLIT].value_counts()
 
-    # Mostrar como tabla
-    print(
-        conteo_generos.reset_index().rename(
-            columns={"index": SerieColumn.GENEROS.value, GENEROS_SPLIT: "Cantidad"}
-        )
-    )
+    # Graficar la distribución de géneros
+    conteo_generos.plot(kind="bar", figsize=(12, 6))
+    plt.xlabel("Género")
+    plt.ylabel("Cantidad")
+    plt.title("Distribución de géneros en series")
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig("distribucion_generos.png")
 
 
 def main():
