@@ -116,18 +116,18 @@ def extraer_puntuacion(soup: BeautifulSoup) -> float | None:
         return None
 
 
-def extraer_donde_ver(soup: BeautifulSoup) -> list[str] | None:
+def extraer_donde_ver(soup: BeautifulSoup) -> list[str]:
     """Extrae las plataformas donde se puede ver la serie.
 
     Args:
         soup (BeautifulSoup): HTML parseado de la página de la serie.
 
     Returns:
-        list[str] | None: Lista de plataformas o None si no hay datos.
+        list[str]: Lista de plataformas.
     """
     div = soup.find_all("div", class_="provider-tile-primary")
     if not div:
-        return None
+        return []
 
     return [d.get_text(strip=True) for d in div]
 
