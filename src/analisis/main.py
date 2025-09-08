@@ -301,6 +301,50 @@ def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
     )
 
 
+###
+# Entregue una tabla con series que tengan una puntuacion por usuarios
+# entre mínimo 4 y máximo 5.0, que tenga como género Animación, que hayan
+# sido emitidas durante el ultimo año (2025) y pueda verse en una
+# plataforma de streaming.
+def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
+    # Filtrar por puntaje
+    df_filtrado = df[
+        (df[SerieColumn.PUNTUACION.value] >= 4) & (df[SerieColumn.PUNTUACION.value] <= 5)
+    ].copy()
+
+    GENEROS_SPLIT = "generos_split"
+    # Separar los géneros en listas
+    df_filtrado[GENEROS_SPLIT] = df_filtrado[SerieColumn.GENEROS.value].str.split(",")
+    # Explode para tener una fila por cada género
+    df_exploded = df_filtrado.explode(GENEROS_SPLIT)
+    # Limpiar espacios extra
+    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+
+    # Filtrar por género Animación
+    df_exploded = df_exploded[df_exploded[GENEROS_SPLIT] == "Animación"]
+
+    # Filtrar por series emitidas en 2025
+    df_exploded = df_exploded[df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value] == 2025]
+
+    # Filtrar por disponibilidad en streaming
+    df_exploded = df_exploded[
+        df_exploded[SerieColumn.DONDE_VER.value].notnull()
+        & (df_exploded[SerieColumn.DONDE_VER.value] != "")
+    ]
+
+    # Mostrar tabla
+    imprimir_data_frame(
+        df_exploded,
+        mensaje="Tabla de series de animación con puntaje entre 4 y 5, emitidas en 2025 y disponibles en streaming:",
+        columnas=[
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.FECHA_EMISION_ULTIMA.value,
+            SerieColumn.DONDE_VER.value,
+        ],
+    )
+
+
 def main():
     df = importar_data_frame()
 
@@ -309,7 +353,10 @@ def main():
     # respuesta_series_con_mas_temporadas_puntaje(df)
     # respuesta_puntaje_generos_estadisticas(df)
     # respuesta_series_puntuacion_en_limites(df)
-    respuesta_mejor_plataforma_streaming(df)
+    # respuesta_mejor_plataforma_streaming(df)
+    respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
+
+    imprimir_data_frame(df, mensaje="asd")
 
 
 if __name__ == "__main__":
