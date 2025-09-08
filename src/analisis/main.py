@@ -14,6 +14,18 @@ def importar_data_frame() -> pd.DataFrame:
     return pd.read_pickle(settings.nombre_archivo_pkl)
 
 
+def imprimir_data_frame(df: pd.DataFrame, columnas: list[str] | None = None):
+    """
+    Imprime el DataFrame en formato tabla markdown.
+    Si se especifica una lista de columnas, solo muestra esas columnas.
+    """
+    if columnas is not None:
+        df = df[columnas]
+
+    print("\nData Frame")
+    print(df.to_markdown(index=False))
+
+
 def respuesta_donde_ver(df: pd.DataFrame):
     DONDE_VER_SPLIT = "donde_ver_split"
 
@@ -88,14 +100,106 @@ def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
     print(df_top.to_markdown(index=False))
 
 
+def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
+    GENEROS_SPLIT = "generos_split"
+
+    # Separar los géneros en listas
+    df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
+
+    # Explode para tener una fila por cada género
+    df_exploded = df.explode(GENEROS_SPLIT)
+
+    # Limpiar espacios extra
+    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+
+    # Calcular puntaje promedio por género
+    puntaje_por_genero = (
+        df_exploded.groupby(GENEROS_SPLIT)[SerieColumn.PUNTUACION.value].mean().round(3)
+    )
+    tabla = puntaje_por_genero.reset_index().rename(
+        columns={
+            GENEROS_SPLIT: "Genero",
+            SerieColumn.PUNTUACION.value: "Puntaje por usuario promedio",
+        }
+    )
+
+    print("\nTabla de puntaje promedio por género:")
+    print(tabla.to_markdown(index=False))
+
+    # Seleccionar géneros con mayor y menor puntaje promedio
+    top3 = puntaje_por_genero.sort_values(ascending=False).head(3)
+    bottom2 = puntaje_por_genero.sort_values(ascending=True).head(2)
+
+    print("\nEstadísticas descriptivas de los 3 géneros con mayor puntaje promedio:")
+    for genero in top3.index:
+        puntajes = df_exploded[df_exploded[GENEROS_SPLIT] == genero][SerieColumn.PUNTUACION.value]
+        print(f"\nGénero: {genero}")
+        print(f"Promedio: {puntajes.mean():.3f}")
+        print(f"Desviación estándar: {puntajes.std():.3f}")
+        print(f"Máximo: {puntajes.max():.3f}")
+        print(f"Mínimo: {puntajes.min():.3f}")
+
+    print("\nEstadísticas descriptivas de los 2 géneros con menor puntaje promedio:")
+    for genero in bottom2.index:
+        puntajes = df_exploded[df_exploded[GENEROS_SPLIT] == genero][SerieColumn.PUNTUACION.value]
+        print(f"\nGénero: {genero}")
+        print(f"Promedio: {puntajes.mean():.3f}")
+        print(f"Desviación estándar: {puntajes.std():.3f}")
+        print(f"Máximo: {puntajes.max():.3f}")
+        print(f"Mínimo: {puntajes.min():.3f}")
+
+
+def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
+    DONDE_VER_SPLIT = "donde_ver_split"
+
+    # Separar los servicios en listas
+    df[DONDE_VER_SPLIT] = df[SerieColumn.DONDE_VER.value].str.split(",")
+
+    # Explode para tener una fila por cada servicio
+    df_exploded = df.explode(DONDE_VER_SPLIT)
+
+    # Limpiar espacios extra
+    df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
+
+    # Se agrupa por Servicio de Streaming
+    df_agrupado = df_exploded.groupby(DONDE_VER_SPLIT)
+
+    # Calcular cantidad de series
+    cantidad_series = df_agrupado[SerieColumn.TITULO.value].count()
+
+    # Calcular puntaje promedio por servicio
+    puntaje_por_servicio = df_agrupado[SerieColumn.PUNTUACION.value].mean().round(3)
+
+    # Unir ambas métricas en una sola tabla
+    tabla = pd.DataFrame(
+        {
+            "Streaming": cantidad_series.index,
+            "Cantidad de series": cantidad_series.values,
+            "Puntuacion por usuario promedio": puntaje_por_servicio.values,
+        }
+    )
+
+    print("\nTabla de servicios de streaming, cantidad de series y puntaje promedio:")
+    print(tabla.to_markdown(index=False))
+
+
 def main():
     df = importar_data_frame()
 
-    respuesta_donde_ver(df)
+    # respuesta_donde_ver(df)
+    # respuesta_generos(df)
+    # respuesta_series_con_mas_temporadas_puntaje(df)
+    # respuesta_puntaje_generos_estadisticas(df)
+    respuesta_streaming_cant_series_puntaje(df)
 
-    respuesta_generos(df)
-
-    respuesta_series_con_mas_temporadas_puntaje(df)
+    imprimir_data_frame(
+        df,
+        columnas=[
+            SerieColumn.TITULO.value,
+            SerieColumn.DONDE_VER.value,
+            SerieColumn.PUNTUACION.value,
+        ],
+    )
 
 
 if __name__ == "__main__":
