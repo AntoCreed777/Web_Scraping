@@ -454,15 +454,27 @@ def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
 def main():
     df = importar_data_frame()
 
-    # respuesta_donde_ver(df)
-    # respuesta_generos(df)
-    # respuesta_series_con_mas_temporadas_puntaje(df)
-    # respuesta_puntaje_generos_estadisticas(df)
-    # respuesta_series_puntuacion_en_limites(df)
-    # respuesta_mejor_plataforma_streaming(df)
-    # respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
-    # respuesta_recomendacion(df)
-    # respuesta_series_mejor_evaluadas_por_anio(df)
+    print("\nParte 2.1")
+    respuesta_donde_ver(df)
+
+    print("\nParte 2.2")
+    respuesta_generos(df)
+
+    print("\nParte 2.3")
+    respuesta_series_con_mas_temporadas_puntaje(df)
+    respuesta_puntaje_generos_estadisticas(df)
+    respuesta_streaming_cant_series_puntaje(df)
+
+    print("\nParte 2.4")
+    respuesta_series_puntuacion_en_limites(df)
+    respuesta_mejor_plataforma_streaming(df)
+
+    print("\nParte 2.5")
+    respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
+    respuesta_recomendacion(df)
+
+    print("\nParte 2.6")
+    respuesta_series_mejor_evaluadas_por_anio(df)
     respuesta_puntaje_promedio_por_anio(df)
 
 
