@@ -349,7 +349,7 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
 # En base a tu analisis ¿Que serie de animación reciente
 # recomendarias a un fan de la acción?
 # ¿Para un fan de la comedia?
-def respuesta_recomendacion(df):
+def respuesta_recomendacion(df: pd.DataFrame):
     GENEROS_SPLIT = "generos_split"
     # Separar los géneros en listas
     df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
@@ -403,6 +403,32 @@ def respuesta_recomendacion(df):
     )
 
 
+###
+# Entregue una tabla con series con la serie mejor evaluada
+# por cada año segun su fecha original de emisión.
+def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
+    # Agrupar por año de emisión original y obtener la serie con mayor puntaje en cada año
+    df_filtrado = df[df[SerieColumn.FECHA_EMISION_ORIGINAL.value].notnull()]
+    idx = df_filtrado.groupby(SerieColumn.FECHA_EMISION_ORIGINAL.value)[
+        SerieColumn.PUNTUACION.value
+    ].idxmax()
+    df_mejor_por_anio = df_filtrado.loc[idx]
+
+    # Mostrar tabla ordenada por año
+    df_mejor_por_anio = df_mejor_por_anio.sort_values(by=SerieColumn.FECHA_EMISION_ORIGINAL.value)
+    imprimir_data_frame(
+        df_mejor_por_anio,
+        mensaje="Tabla de la serie mejor evaluada por cada año de emisión original:",
+        columnas=[
+            SerieColumn.FECHA_EMISION_ORIGINAL.value,
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.GENEROS.value,
+            SerieColumn.DONDE_VER.value,
+        ],
+    )
+
+
 def main():
     df = importar_data_frame()
 
@@ -413,7 +439,8 @@ def main():
     # respuesta_series_puntuacion_en_limites(df)
     # respuesta_mejor_plataforma_streaming(df)
     # respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
-    respuesta_recomendacion(df)
+    # respuesta_recomendacion(df)
+    respuesta_series_mejor_evaluadas_por_anio(df)
 
 
 if __name__ == "__main__":
