@@ -40,30 +40,49 @@ def extraer_titulo_original(info) -> str | None:
     return div.find("strong").get_text(strip=True)
 
 
-def extraer_cantidad_temporadas_y_episodios(soup: BeautifulSoup) -> list[int] | None:
-    """Extrae la cantidad de temporadas y episodios de la serie.
+def extraer_cantidad_temporadas_y_episodios(soup: BeautifulSoup) -> tuple[int | None, int | None]:
+    """
+    Extrae la cantidad de temporadas y episodios de la serie.
 
     Args:
         soup (BeautifulSoup): HTML parseado de la página de la serie.
 
     Returns:
-        list[int] | None: [temporadas, episodios] o None si no se encuentra.
+        tuple[int | None, int | None]: Una tupla (temporadas, episodios), cada uno puede ser None si no se encuentra.
     """
     info_serie_stats = soup.find("div", class_="stats-numbers-seriespage")
     if not info_serie_stats:
-        return None
+        return (None, None)
 
-    div = info_serie_stats.find_all("div", class_="stats-item")
-    if not div:
-        return None
+    divs = info_serie_stats.find_all("div", class_="stats-item")
+    temporadas = None
+    episodios = None
+    if len(divs) > 0:
+        try:
+            temporadas = int(divs[0].get_text(strip=True).split()[0])
+        except Exception:
+            temporadas = None
+    if len(divs) > 1:
+        try:
+            episodios = int(divs[1].get_text(strip=True).split()[0])
+        except Exception:
+            episodios = None
+    return (temporadas, episodios)
 
-    return [int(d.get_text(strip=True).split()[0]) for d in div]
 
+def extraer_fecha_emision(info) -> tuple[int | None, int | None]:
+    """
+    Extrae las fechas de emisión original y última de la serie.
 
-def extraer_fecha_emision(info) -> list[int | None] | None:
+    Args:
+        info (BeautifulSoup): Bloque HTML con información de la serie.
+
+    Returns:
+        tuple[int | None, int | None]: Una tupla (año_inicio, año_final), cada uno puede ser None si no se encuentra.
+    """
     div = info.find("div", class_="meta-body-info")
     if not div:
-        return []
+        return (None, None)
     texto = div.get_text(" ", strip=True)
 
     import re
@@ -74,15 +93,15 @@ def extraer_fecha_emision(info) -> list[int | None] | None:
         anio_inicio = int(match.group(1))
         anio_final = match.group(2)
         if anio_final and anio_final.isdigit():
-            return [anio_inicio, int(anio_final)]
+            return (anio_inicio, int(anio_final))
         else:
-            return [anio_inicio, None]
+            return (anio_inicio, None)
 
     # Si solo hay un año
     match = re.search(r"(\d{4})", texto)
     if match:
-        return [int(match.group(1)), None]
-    return [None, None]
+        return (int(match.group(1)), None)
+    return (None, None)
 
 
 def extraer_puntuacion(soup: BeautifulSoup) -> float | None:
@@ -137,9 +156,7 @@ def extraer_datos_de_serie(serie: DatosSerie):
     # Extraer fechas de emision original y ultima
     if fechas_emision := extraer_fecha_emision(info=info_serie):
         serie.fecha_emision_original = fechas_emision[0]
-
-        if len(fechas_emision) == 2:
-            serie.fecha_emision_ultima = fechas_emision[1]
+        serie.fecha_emision_ultima = fechas_emision[1]
 
     # Extraer puntuacion
     serie.puntuacion = extraer_puntuacion(soup)
