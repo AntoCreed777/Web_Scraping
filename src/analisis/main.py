@@ -26,6 +26,11 @@ def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: list[str] | No
     print(df.to_markdown(index=False))
 
 
+###
+# ¿Cuáles servicios de streaming están como opciones disponibles para
+# ver series en la lista de sensacine?
+# ¿Cuántas series pueden verse en cada servicio de streaming según
+# la lista de sensacine?
 def respuesta_donde_ver(df: pd.DataFrame):
     DONDE_VER_SPLIT = "donde_ver_split"
 
@@ -46,6 +51,10 @@ def respuesta_donde_ver(df: pd.DataFrame):
     imprimir_data_frame(tabla, mensaje="Tabla de cantidad de series por servicio de streaming:")
 
 
+###
+# ¿Como se distribuye la cantidad de géneros en este conjunto de series?
+# Ademas, con esta información construya un gráfico de barras.
+# Para esto pueden utilizar la librería **Matplotlib**.
 def respuesta_generos(df: pd.DataFrame):
     GENEROS_SPLIT = "generos_split"
 
@@ -75,6 +84,10 @@ def respuesta_generos(df: pd.DataFrame):
     plt.savefig("distribucion_generos.png")
 
 
+###
+# Entregue una tabla con las 30 series con más de 2 temporadas
+# y mayor puntaje hecho por usuarios.
+# Muestre solamente nombre, puntaje, cantidad de temporadas y cantidad de episodios
 def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
     # Filtrar series con más de 2 temporadas
     df_filtrado = df[df[SerieColumn.CANTIDAD_TEMPORADAS.value] > 2]
@@ -106,6 +119,12 @@ def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
     )
 
 
+###
+# Muestre en una tabla el puntaje segun usuarios promedio de todos
+# los generos (redondée a 3 decimales) y luego las estadísticas descriptivas
+# (desviación estándar, promedio, valor máximo y mínimo) de los 3 géneros de
+# series que tengan la mayor puntuación promedio y los 2 generos que tengan
+# la menor puntuación promedio.
 def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
     GENEROS_SPLIT = "generos_split"
 
@@ -154,6 +173,10 @@ def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
         print(f"Mínimo: {puntajes.min():.3f}")
 
 
+###
+# Entregue una tabla con los servicios de streaming,
+# la cantidad de series que se pueden observar en cada uno de ellos y
+# el puntaje por usuario promedio de estas series, redondée a 3 decimales.
 def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
     DONDE_VER_SPLIT = "donde_ver_split"
 
@@ -233,14 +256,22 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
     )
 
 
+###
+# ¿Cúal es la plataforma de streaming que vale la pena contratar
+# según calidad/cantidad de series de acuerdo con los datos de Sensacine?
+def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
+    pass
+
+
 def main():
     df = importar_data_frame()
 
-    respuesta_donde_ver(df)
-    respuesta_generos(df)
-    respuesta_series_con_mas_temporadas_puntaje(df)
-    respuesta_puntaje_generos_estadisticas(df)
-    respuesta_series_puntuacion_en_limites(df)
+    # respuesta_donde_ver(df)
+    # respuesta_generos(df)
+    # respuesta_series_con_mas_temporadas_puntaje(df)
+    # respuesta_puntaje_generos_estadisticas(df)
+    # respuesta_series_puntuacion_en_limites(df)
+    respuesta_mejor_plataforma_streaming(df)
 
 
 if __name__ == "__main__":
