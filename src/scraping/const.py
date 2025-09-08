@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class AppSettings:
     """Configuración de la aplicación para URLs base y endpoints."""
 

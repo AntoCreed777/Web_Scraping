@@ -26,26 +26,29 @@ def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: list[str] | No
     print(df.to_markdown(index=False))
 
 
+def split_df(df: pd.DataFrame, columna: str) -> tuple[str, pd.DataFrame]:
+    COLUMNA_SPLIT = columna + "_split"
+
+    # Separar en listas
+    df[COLUMNA_SPLIT] = df[columna].str.split(",")
+
+    # Explode para tener una fila por cada elemento
+    df_exploded = df.explode(COLUMNA_SPLIT)
+
+    # Limpiar espacios extra
+    df_exploded[COLUMNA_SPLIT] = df_exploded[COLUMNA_SPLIT].str.strip()
+
+    return COLUMNA_SPLIT, df_exploded
+
+
 ###
 # ¿Cuáles servicios de streaming están como opciones disponibles para
 # ver series en la lista de sensacine?
 # ¿Cuántas series pueden verse en cada servicio de streaming según
 # la lista de sensacine?
 def respuesta_donde_ver(df: pd.DataFrame):
-    DONDE_VER_SPLIT = "donde_ver_split"
-
-    # Separar los servicios en listas
-    df[DONDE_VER_SPLIT] = df[SerieColumn.DONDE_VER.value].str.split(",")
-
-    # Explode para tener una fila por cada servicio
-    df_exploded = df.explode(DONDE_VER_SPLIT)
-
-    # Limpiar espacios extra
-    df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
-
-    # Contar cuántas series hay por cada servicio
+    DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
     conteo = df_exploded[DONDE_VER_SPLIT].value_counts()
-
     tabla = conteo.reset_index()
     tabla.columns = ["Servicio", "Cantidad"]
     imprimir_data_frame(tabla, mensaje="Tabla de cantidad de series por servicio de streaming:")
@@ -56,16 +59,7 @@ def respuesta_donde_ver(df: pd.DataFrame):
 # Ademas, con esta información construya un gráfico de barras.
 # Para esto pueden utilizar la librería **Matplotlib**.
 def respuesta_generos(df: pd.DataFrame):
-    GENEROS_SPLIT = "generos_split"
-
-    # Separar los géneros en listas
-    df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
-
-    # Explode para tener una fila por cada género
-    df_exploded = df.explode(GENEROS_SPLIT)
-
-    # Limpiar espacios extra
-    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+    GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Contar cuántas veces aparece cada género
     conteo_generos = df_exploded[GENEROS_SPLIT].value_counts()
@@ -126,16 +120,7 @@ def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
 # series que tengan la mayor puntuación promedio y los 2 generos que tengan
 # la menor puntuación promedio.
 def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
-    GENEROS_SPLIT = "generos_split"
-
-    # Separar los géneros en listas
-    df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
-
-    # Explode para tener una fila por cada género
-    df_exploded = df.explode(GENEROS_SPLIT)
-
-    # Limpiar espacios extra
-    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+    GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Calcular puntaje promedio por género
     puntaje_por_genero = (
@@ -178,16 +163,7 @@ def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
 # la cantidad de series que se pueden observar en cada uno de ellos y
 # el puntaje por usuario promedio de estas series, redondée a 3 decimales.
 def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
-    DONDE_VER_SPLIT = "donde_ver_split"
-
-    # Separar los servicios en listas
-    df[DONDE_VER_SPLIT] = df[SerieColumn.DONDE_VER.value].str.split(",")
-
-    # Explode para tener una fila por cada servicio
-    df_exploded = df.explode(DONDE_VER_SPLIT)
-
-    # Limpiar espacios extra
-    df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
+    DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
 
     # Se agrupa por Servicio de Streaming
     df_agrupado = df_exploded.groupby(DONDE_VER_SPLIT)
@@ -223,10 +199,7 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
         (df[SerieColumn.PUNTUACION.value] >= 3.5) & (df[SerieColumn.PUNTUACION.value] <= 5)
     ].copy()
 
-    GENEROS_SPLIT = "generos_split"
-    df_filtrado[GENEROS_SPLIT] = df_filtrado[SerieColumn.GENEROS.value].str.split(",")
-    df_exploded = df_filtrado.explode(GENEROS_SPLIT)
-    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+    GENEROS_SPLIT, df_exploded = split_df(df_filtrado, SerieColumn.GENEROS.value)
 
     # Filtrar por género Drama
     df_exploded = df_exploded[df_exploded[GENEROS_SPLIT] == "Drama"]
@@ -260,16 +233,7 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
 # ¿Cúal es la plataforma de streaming que vale la pena contratar
 # según calidad/cantidad de series de acuerdo con los datos de Sensacine?
 def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
-    DONDE_VER_SPLIT = "donde_ver_split"
-
-    # Separar los servicios en listas
-    df[DONDE_VER_SPLIT] = df[SerieColumn.DONDE_VER.value].str.split(",")
-
-    # Explode para tener una fila por cada servicio
-    df_exploded = df.explode(DONDE_VER_SPLIT)
-
-    # Limpiar espacios extra
-    df_exploded[DONDE_VER_SPLIT] = df_exploded[DONDE_VER_SPLIT].str.strip()
+    DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
 
     # Se agrupa por Servicio de Streaming
     df_agrupado = df_exploded.groupby(DONDE_VER_SPLIT)
@@ -312,13 +276,7 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
         (df[SerieColumn.PUNTUACION.value] >= 4) & (df[SerieColumn.PUNTUACION.value] <= 5)
     ].copy()
 
-    GENEROS_SPLIT = "generos_split"
-    # Separar los géneros en listas
-    df_filtrado[GENEROS_SPLIT] = df_filtrado[SerieColumn.GENEROS.value].str.split(",")
-    # Explode para tener una fila por cada género
-    df_exploded = df_filtrado.explode(GENEROS_SPLIT)
-    # Limpiar espacios extra
-    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+    GENEROS_SPLIT, df_exploded = split_df(df_filtrado, SerieColumn.GENEROS.value)
 
     # Filtrar por género Animación
     df_exploded = df_exploded[df_exploded[GENEROS_SPLIT] == "Animación"]
@@ -350,13 +308,7 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
 # recomendarias a un fan de la acción?
 # ¿Para un fan de la comedia?
 def respuesta_recomendacion(df: pd.DataFrame):
-    GENEROS_SPLIT = "generos_split"
-    # Separar los géneros en listas
-    df[GENEROS_SPLIT] = df[SerieColumn.GENEROS.value].str.split(",")
-    # Explode para tener una fila por cada género
-    df_exploded = df.explode(GENEROS_SPLIT)
-    # Limpiar espacios extra
-    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+    GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Filtrar series de animación emitidas en el último año (2025)
     df_animacion_2025 = df_exploded[
