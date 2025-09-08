@@ -39,7 +39,12 @@ def buscar_links_de_series(soup: BeautifulSoup) -> list[DatosSerie]:
         list[DatosSerie]: Lista de objetos DatosSerie con link y título.
     """
     # Busca los contenedores de películas.
-    peliculas = soup.find_all("li", class_="mdl")
+    peliculas = None
+    try:
+        peliculas = soup.find_all("li", class_="mdl")
+    except Exception as e:
+        raise e
+
     datos_serie = []
 
     for peli in peliculas:
