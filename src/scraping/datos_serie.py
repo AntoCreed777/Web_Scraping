@@ -1,7 +1,21 @@
 """Definición de la clase DatosSerie para almacenar información de series de TV."""
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional
+
+
+class SerieColumn(Enum):
+    LINK = "link"
+    TITULO = "titulo"
+    TITULO_ORIGINAL = "titulo_original"
+    GENEROS = "generos"
+    CANTIDAD_TEMPORADAS = "cantidad_temporadas"
+    CANTIDAD_EPISODIOS_TOTALES = "cantidad_episodios_totales"
+    FECHA_EMISION_ORIGINAL = "fecha_emision_original"
+    FECHA_EMISION_ULTIMA = "fecha_emision_ultima"
+    PUNTUACION = "puntuacion"
+    DONDE_VER = "donde_ver"
 
 
 @dataclass
@@ -12,8 +26,7 @@ class DatosSerie:
 
     titulo: Optional[str] = None
     titulo_original: Optional[str] = None
-    genero: Optional[str] = None
-    sub_generos: Optional[list[str]] = field(default_factory=list)
+    generos: Optional[list[str]] = field(default_factory=list)
     cantidad_temporadas: Optional[int] = None
     cantidad_episodios_totales: Optional[int] = None
     fecha_emision_original: Optional[int] = None
@@ -26,7 +39,7 @@ class DatosSerie:
         result = {}
         for field in self.__dataclass_fields__:
             value = getattr(self, field)
-            if field in ("sub_generos", "donde_ver"):
+            if field in (SerieColumn.GENEROS.value, SerieColumn.DONDE_VER.value):
                 value = ", ".join(value) if value else None
             result[field] = value
         return result
@@ -44,8 +57,7 @@ class DatosSerie:
         return (
             f"Título: {self.titulo or 'Desconocido'}\n"
             f"Título original: {self.titulo_original or 'Desconocido'}\n"
-            f"Género principal: {self.genero or 'Desconocido'}\n"
-            f"Subgéneros: {', '.join(self.sub_generos) if self.sub_generos else 'Ninguno'}\n"
+            f"Géneros: {', '.join(self.generos) if self.generos else 'Ninguno'}\n"
             f"Temporadas: {self.cantidad_temporadas or 'Desconocido'}\n"
             f"Episodios totales: {self.cantidad_episodios_totales or 'Desconocido'}\n"
             f"Fecha emisión: {fecha_ini} - {fecha_fin}\n"

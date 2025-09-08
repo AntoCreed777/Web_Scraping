@@ -124,9 +124,7 @@ def extraer_datos_de_serie(serie: DatosSerie):
     # Extraer Genero y Sub-Genero
     info_serie = soup.find("div", class_="meta-body")
 
-    if generos := extraer_generos(info=info_serie):
-        serie.genero = generos[0]  # el principal
-        serie.sub_generos = generos[1:]  # los demás
+    serie.generos = extraer_generos(info=info_serie)
 
     # Extraer el Titulo Original
     serie.titulo_original = extraer_titulo_original(info=info_serie)
