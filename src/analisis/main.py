@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,7 +15,7 @@ def importar_data_frame() -> pd.DataFrame:
     return pd.read_pickle(settings.nombre_archivo_pkl)
 
 
-def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: list[str] | None = None):
+def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: Optional[list[str]] = None):
     """
     Imprime el DataFrame en formato tabla markdown.
     Si se especifica una lista de columnas, solo muestra esas columnas.
