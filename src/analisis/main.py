@@ -429,6 +429,28 @@ def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
     )
 
 
+###
+# Presente un histograma con el puntaje promedio de
+# las series estrenadas durante ese año por cada año.
+def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
+    df_filtrado = df.groupby(SerieColumn.FECHA_EMISION_ORIGINAL.value)[
+        SerieColumn.PUNTUACION.value
+    ].mean()
+    df_tabla = df_filtrado.reset_index()
+
+    # Graficar puntaje promedio por año (gráfico de barras)
+    plt.figure(figsize=(12, 6))
+    anios = df_tabla[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int)
+    plt.bar(anios, df_tabla[SerieColumn.PUNTUACION.value], color="skyblue", edgecolor="black")
+    plt.xlabel("Año")
+    plt.ylabel("Puntaje promedio")
+    plt.title("Puntaje promedio de series estrenadas por año")
+    plt.xticks(anios, rotation=45)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig("puntaje_promedio_por_año.png")
+
+
 def main():
     df = importar_data_frame()
 
@@ -440,7 +462,8 @@ def main():
     # respuesta_mejor_plataforma_streaming(df)
     # respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df)
     # respuesta_recomendacion(df)
-    respuesta_series_mejor_evaluadas_por_anio(df)
+    # respuesta_series_mejor_evaluadas_por_anio(df)
+    respuesta_puntaje_promedio_por_anio(df)
 
 
 if __name__ == "__main__":
