@@ -183,6 +183,50 @@ def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
     print(tabla.to_markdown(index=False))
 
 
+###
+# Entregue una tabla con series que tengan una puntuacion
+# por usuarios entre mínimo 3.5 y máximo 5.0, que tenga como género Drama,
+# que tengan 2 o más Temporadas, que hayan terminado de emitirse y
+# pueda verse en una plataforma de streaming.
+def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
+    # Filtrar por puntaje
+    df_filtrado = df[
+        (df[SerieColumn.PUNTUACION.value] >= 3.5) & (df[SerieColumn.PUNTUACION.value] <= 5)
+    ]
+
+    GENEROS_SPLIT = "generos_split"
+    df_filtrado[GENEROS_SPLIT] = df_filtrado[SerieColumn.GENEROS.value].str.split(",")
+    df_exploded = df_filtrado.explode(GENEROS_SPLIT)
+    df_exploded[GENEROS_SPLIT] = df_exploded[GENEROS_SPLIT].str.strip()
+
+    # Filtrar por género Drama
+    df_exploded = df_exploded[df_exploded[GENEROS_SPLIT] == "Drama"]
+
+    # Filtrar por temporadas
+    df_exploded = df_exploded[df_exploded[SerieColumn.CANTIDAD_TEMPORADAS.value] >= 2]
+
+    # Filtrar por series terminadas
+    df_exploded = df_exploded[df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].notnull()]
+
+    # Filtrar por disponibilidad en streaming
+    df_exploded = df_exploded[
+        df_exploded[SerieColumn.DONDE_VER.value].notnull()
+        & (df_exploded[SerieColumn.DONDE_VER.value] != "")
+    ]
+
+    # Mostrar tabla
+    imprimir_data_frame(
+        df_exploded,
+        columnas=[
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.CANTIDAD_TEMPORADAS.value,
+            SerieColumn.FECHA_EMISION_ULTIMA.value,
+            SerieColumn.DONDE_VER.value,
+        ],
+    )
+
+
 def main():
     df = importar_data_frame()
 
@@ -190,16 +234,7 @@ def main():
     # respuesta_generos(df)
     # respuesta_series_con_mas_temporadas_puntaje(df)
     # respuesta_puntaje_generos_estadisticas(df)
-    respuesta_streaming_cant_series_puntaje(df)
-
-    imprimir_data_frame(
-        df,
-        columnas=[
-            SerieColumn.TITULO.value,
-            SerieColumn.DONDE_VER.value,
-            SerieColumn.PUNTUACION.value,
-        ],
-    )
+    respuesta_series_puntuacion_en_limites(df)
 
 
 if __name__ == "__main__":
