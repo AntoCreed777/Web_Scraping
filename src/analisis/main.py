@@ -15,7 +15,12 @@ def importar_data_frame() -> pd.DataFrame:
     return pd.read_pickle(settings.nombre_archivo_pkl)
 
 
-def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: Optional[list[str]] = None):
+def imprimir_data_frame(
+    df: pd.DataFrame,
+    mensaje: str,
+    columnas: Optional[list[str]] = None,
+    cantidad: Optional[int] = None,
+):
     """
     Imprime el DataFrame en formato tabla markdown.
     Si se especifica una lista de columnas, solo muestra esas columnas.
@@ -24,7 +29,15 @@ def imprimir_data_frame(df: pd.DataFrame, mensaje: str, columnas: Optional[list[
         df = df[columnas]
 
     print(f"\n{mensaje}")
-    print(df.to_markdown(index=False))
+
+    if df.empty:
+        print("El DataFrame está vacío.")
+        return
+
+    if cantidad is None:
+        print(df.to_markdown(index=False))
+    else:
+        print(df.head(cantidad).to_markdown(index=False))
 
 
 def split_df(df: pd.DataFrame, columna: str) -> tuple[str, pd.DataFrame]:
