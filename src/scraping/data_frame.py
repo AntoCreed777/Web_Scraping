@@ -26,16 +26,25 @@ def limpiar_dataframe(df: pd.DataFrame) -> pd.DataFrame:
             df[field] = df[field].fillna(null_value).astype(str).str.strip()
         elif field in (SerieColumn.GENEROS.value, SerieColumn.DONDE_VER.value):
             # Normaliza listas representadas como string
-            df[field] = (
-                df[field]
-                .fillna("")
-                .apply(
-                    lambda x: (
-                        x if isinstance(x, str) else ", ".join(x) if isinstance(x, list) else str(x)
+            df[field] = df[field].apply(
+                lambda x: (
+                    x
+                    if isinstance(x, str) and x  # Y no esta vacio
+                    else (
+                        null_value
+                        if isinstance(x, list) and not x  # Lista vacia
+                        else (
+                            ", ".join(x)
+                            if isinstance(x, list)
+                            else (
+                                str(x)
+                                if x is not None  # El "" se considera como None
+                                else null_value
+                            )
+                        )
                     )
                 )
             )
-            df[field] = df[field].replace({"": null_value, None: null_value})
         elif field in (
             SerieColumn.FECHA_EMISION_ORIGINAL.value,
             SerieColumn.FECHA_EMISION_ULTIMA.value,
