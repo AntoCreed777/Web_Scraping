@@ -17,11 +17,16 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 
 def scraping_obtener_links_series(
-    desde_pagina: int = 1, hasta_pagina: Optional[int] = None
+    desde_pagina: Optional[int] = 1, hasta_pagina: Optional[int] = None
 ) -> list[DatosSerie]:
     series: list[DatosSerie] = []
     link_paginas_a_buscar_base = settings.series_tv_link + "?page="
-    contador_paginas = desde_pagina
+
+    if desde_pagina is None:
+        contador_paginas = 1
+    else:
+        contador_paginas = desde_pagina
+
     series_en_pagina_anterior = None
 
     while True:
@@ -55,7 +60,9 @@ def scraping_obtener_links_series(
 
 def main():
     """Función principal del script. Orquesta el scraping y muestra resultados."""
-    series = scraping_obtener_links_series(hasta_pagina=150)
+    desde_pagina: Optional[int] = 1
+    hasta_pagina: Optional[int] = 150
+    series = scraping_obtener_links_series(desde_pagina=desde_pagina, hasta_pagina=hasta_pagina)
 
     if not series:
         print("No hay series a para extraer los datos")
@@ -67,7 +74,19 @@ def main():
     df = datos_series_a_dataframe(series)
     df = limpiar_dataframe(df)
 
+    # Creacion del nombre definitivo del archivo
+    if desde_pagina is None:
+        desde_pagina = 1
+
+    if hasta_pagina is None:
+        hasta_pagina = "X"
+
     nombre_archivo = settings.nombre_archivo_pkl
+    partes_nombre_archivo = nombre_archivo.split(".")
+    nombre_archivo = (
+        partes_nombre_archivo[0] + f"_{desde_pagina}_{hasta_pagina}." + partes_nombre_archivo[1]
+    )
+
     guardar_dataframe_pickle(df, nombre_archivo)
     logging.info(f"Datos guardados en {nombre_archivo}. Total de series: {len(df)}")
 
