@@ -8,7 +8,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from src.scraping.const import settings
-from src.scraping.datos_serie import SerieColumn
+from src.scraping.datos_serie import SerieColumn, SerieNullValues
 
 
 def importar_data_frame() -> pd.DataFrame:
@@ -36,6 +36,7 @@ def imprimir_data_frame(
 
     if cantidad is None:
         print(df.to_markdown(index=False))
+        print(f"Filas mostradas: {len(df)}")
     else:
         print(df.head(cantidad).to_markdown(index=False))
 
@@ -165,9 +166,17 @@ def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
     print("\nEstadísticas descriptivas de los 2 géneros con menor puntaje promedio:")
     for genero in bottom2.index:
         puntajes = df_exploded[df_exploded[GENEROS_SPLIT] == genero][SerieColumn.PUNTUACION.value]
+
+        # Calculo de la desviacion estandar
+        desv = puntajes.std()
+        if pd.isna(desv):
+            desv_str = "No aplica"
+        else:
+            desv_str = f"{desv:.3f}"
+
         print(f"\nGénero: {genero}")
         print(f"Promedio: {puntajes.mean():.3f}")
-        print(f"Desviación estándar: {puntajes.std():.3f}")
+        print(f"Desviación estándar: {desv_str}")
         print(f"Máximo: {puntajes.max():.3f}")
         print(f"Mínimo: {puntajes.min():.3f}")
 
@@ -208,6 +217,8 @@ def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
 # que tengan 2 o más Temporadas, que hayan terminado de emitirse y
 # pueda verse en una plataforma de streaming.
 def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
+    from datetime import datetime
+
     # Filtrar por puntaje
     df_filtrado = df[
         (df[SerieColumn.PUNTUACION.value] >= 3.5) & (df[SerieColumn.PUNTUACION.value] <= 5)
@@ -222,13 +233,32 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
     df_exploded = df_exploded[df_exploded[SerieColumn.CANTIDAD_TEMPORADAS.value] >= 2]
 
     # Filtrar por series terminadas
-    df_exploded = df_exploded[df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].notnull()]
-
-    # Filtrar por disponibilidad en streaming
     df_exploded = df_exploded[
-        df_exploded[SerieColumn.DONDE_VER.value].notnull()
-        & (df_exploded[SerieColumn.DONDE_VER.value] != "")
+        (df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].notnull())
+        & (
+            df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].astype(int)
+            != SerieNullValues.FECHA_EMISION_ULTIMA.value
+        )
+        & (df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].astype(int) > 1900)
+        & (df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value].astype(int) <= datetime.now().year)
     ]
+
+    # Filtrar por disponibilidad en streaming (excluye cualquier "No disponible")
+    df_exploded = df_exploded[
+        (df_exploded[SerieColumn.DONDE_VER.value].notnull())
+        & (~df_exploded[SerieColumn.DONDE_VER.value].str.contains(SerieNullValues.DONDE_VER.value))
+    ]
+
+    # Eliminar duplicados por serie y plataforma
+    df_exploded = df_exploded.drop_duplicates(
+        subset=[
+            SerieColumn.TITULO.value,
+            SerieColumn.PUNTUACION.value,
+            SerieColumn.CANTIDAD_TEMPORADAS.value,
+            SerieColumn.FECHA_EMISION_ULTIMA.value,
+            SerieColumn.DONDE_VER.value,
+        ]
+    )
 
     imprimir_data_frame(
         df_exploded,
@@ -249,6 +279,11 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
 def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
     DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
 
+    df_exploded = df_exploded[
+        (df_exploded[DONDE_VER_SPLIT].notnull())
+        & (~df_exploded[SerieColumn.DONDE_VER.value].str.contains(SerieNullValues.DONDE_VER.value))
+    ]
+
     # Se agrupa por Servicio de Streaming
     df_agrupado = df_exploded.groupby(DONDE_VER_SPLIT)
 
@@ -258,8 +293,24 @@ def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
     # Calcular puntaje promedio por servicio
     puntaje_por_servicio = df_agrupado[SerieColumn.PUNTUACION.value].mean()
 
-    # Calcular índice combinado
-    indice_calidad_cantidad = puntaje_por_servicio * cantidad_series
+    # Normalizar ambos valores (min-max)
+    min_cant, max_cant = cantidad_series.min(), cantidad_series.max()
+    min_punt, max_punt = puntaje_por_servicio.min(), puntaje_por_servicio.max()
+    cantidad_series_norm = (
+        (cantidad_series - min_cant) / (max_cant - min_cant)
+        if max_cant > min_cant
+        else cantidad_series * 0
+    )
+    puntaje_por_servicio_norm = (
+        (puntaje_por_servicio - min_punt) / (max_punt - min_punt)
+        if max_punt > min_punt
+        else puntaje_por_servicio * 0
+    )
+
+    # Índice ponderado
+    alpha = 0.5
+    beta = 0.5
+    indice_ponderado = alpha * puntaje_por_servicio_norm + beta * cantidad_series_norm
 
     # Crear la tabla
     tabla = pd.DataFrame(
@@ -267,15 +318,16 @@ def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
             "Streaming": cantidad_series.index,
             "Cantidad de series": cantidad_series.values,
             "Puntaje promedio": puntaje_por_servicio.values,
-            "Índice calidad*cantidad": indice_calidad_cantidad.values,
+            "Índice calidad*cantidad (ponderado)": indice_ponderado.values,
         }
     )
 
-    # Ordenar por índice combinado (puedes cambiar por 'Puntaje promedio' si prefieres)
-    tabla = tabla.sort_values(by="Índice calidad*cantidad", ascending=False)
+    # Ordenar por índice ponderado
+    tabla = tabla.sort_values(by="Índice calidad*cantidad (ponderado)", ascending=False)
 
     imprimir_data_frame(
-        tabla, mensaje="Mejor plataforma de streaming según calidad/cantidad de series:"
+        tabla,
+        mensaje="Mejor plataforma de streaming según índice calidad*cantidad (normalizado y ponderado):",
     )
 
 
@@ -300,8 +352,8 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
 
     # Filtrar por disponibilidad en streaming
     df_exploded = df_exploded[
-        df_exploded[SerieColumn.DONDE_VER.value].notnull()
-        & (df_exploded[SerieColumn.DONDE_VER.value] != "")
+        (df_exploded[SerieColumn.DONDE_VER.value].notnull())
+        & (~df_exploded[SerieColumn.DONDE_VER.value].str.contains(SerieNullValues.DONDE_VER.value))
     ]
 
     # Mostrar tabla
@@ -373,11 +425,24 @@ def respuesta_recomendacion(df: pd.DataFrame):
 # Entregue una tabla con series con la serie mejor evaluada
 # por cada año segun su fecha original de emisión.
 def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
+    from datetime import datetime
+
     # Agrupar por año de emisión original y obtener la serie con mayor puntaje en cada año
-    df_filtrado = df[df[SerieColumn.FECHA_EMISION_ORIGINAL.value].notnull()]
+    df_filtrado = df[
+        (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].notnull())
+        & (
+            df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int)
+            != SerieNullValues.FECHA_EMISION_ORIGINAL.value
+        )
+        & (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int) > 1900)
+        & (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int) <= datetime.now().year)
+    ]
     idx = df_filtrado.groupby(SerieColumn.FECHA_EMISION_ORIGINAL.value)[
         SerieColumn.PUNTUACION.value
     ].idxmax()
+
+    # Eliminar posibles NaN en idx para evitar KeyError
+    idx = idx.dropna()
     df_mejor_por_anio = df_filtrado.loc[idx]
 
     # Mostrar tabla ordenada por año
@@ -399,10 +464,22 @@ def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
 # Presente un histograma con el puntaje promedio de
 # las series estrenadas durante ese año por cada año.
 def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
-    df_filtrado = df.groupby(SerieColumn.FECHA_EMISION_ORIGINAL.value)[
+    from datetime import datetime
+
+    df_filtrado = df[
+        (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].notnull())
+        & (
+            df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int)
+            != SerieNullValues.FECHA_EMISION_ORIGINAL.value
+        )
+        & (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int) > 1900)
+        & (df[SerieColumn.FECHA_EMISION_ORIGINAL.value].astype(int) <= datetime.now().year)
+    ]
+
+    df_agrupado = df_filtrado.groupby(SerieColumn.FECHA_EMISION_ORIGINAL.value)[
         SerieColumn.PUNTUACION.value
     ].mean()
-    df_tabla = df_filtrado.reset_index()
+    df_tabla = df_agrupado.reset_index()
 
     # Graficar puntaje promedio por año (gráfico de barras)
     plt.figure(figsize=(12, 6))
@@ -415,6 +492,7 @@ def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
     plt.tight_layout()
     # plt.show()
     plt.savefig("puntaje_promedio_por_año.png")
+    print("Grafico generado")
 
 
 def main():
