@@ -105,15 +105,28 @@ def extraer_fecha_emision(info) -> tuple[int | None, int | None]:
 
 
 def extraer_puntuacion(soup: BeautifulSoup) -> float | None:
-    div = soup.find("span", class_="stareval-note")
-    if not div:
+    divs = soup.find_all("div", class_="rating-item-content")
+    if not divs:
         return None
-    texto = div.get_text(strip=True)
 
-    try:
-        return float(texto.replace(",", "."))
-    except ValueError:
-        return None
+    def obtener_puntaje(div):
+        span_title = div.find("span", class_="rating-title")
+        if not span_title or span_title.get_text(strip=True) != "Usuarios":
+            return None
+        span_puntaje = div.find("span", class_="stareval-note")
+        if not span_puntaje:
+            return None
+        texto = span_puntaje.get_text(strip=True)
+        try:
+            return float(texto.replace(",", "."))
+        except ValueError:
+            return None
+
+    for div in divs:
+        puntaje = obtener_puntaje(div)
+        if puntaje is not None:
+            return puntaje
+    return None
 
 
 def extraer_donde_ver(soup: BeautifulSoup) -> list[str]:
