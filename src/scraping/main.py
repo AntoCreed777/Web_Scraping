@@ -33,8 +33,8 @@ def main():
             series_en_pagina = buscar_links_de_series(
                 soup=get_soup(link=link_pagina_a_buscar_actual)
             )
-        except ValueError as e:
-            print(e)
+        except Exception as e:
+            logging.error(f"Error al obtener links de la página {contador_paginas}: {e}")
             break
 
         if not series_en_pagina:
