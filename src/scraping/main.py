@@ -1,6 +1,7 @@
 """Script principal para el scraping de series de TV desde Sensacine."""
 
 import logging
+from typing import Optional
 
 from const import settings
 from data_frame import (
@@ -8,22 +9,23 @@ from data_frame import (
     guardar_dataframe_pickle,
     limpiar_dataframe,
 )
+from datos_serie import DatosSerie
 from extraer_datos import extraer_datos_de_series
 from request import buscar_links_de_series, get_soup
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-def main():
-    """Función principal del script. Orquesta el scraping y muestra resultados."""
-    series = []
+def scraping_obtener_links_series(
+    desde_pagina: int = 1, hasta_pagina: Optional[int] = None
+) -> list[DatosSerie]:
+    series: list[DatosSerie] = []
     link_paginas_a_buscar_base = settings.series_tv_link + "?page="
-    contador_paginas = 1
-    limite_de_paginas_a_analizar = 150
+    contador_paginas = desde_pagina
     series_en_pagina_anterior = None
 
     while True:
-        if contador_paginas == limite_de_paginas_a_analizar + 1:
+        if hasta_pagina is not None and contador_paginas == hasta_pagina + 1:
             break
 
         logging.info(f"Se va a leer la pagina {contador_paginas}.")
@@ -47,6 +49,13 @@ def main():
         series += series_en_pagina
         series_en_pagina_anterior = series_en_pagina
         contador_paginas += 1
+
+    return series
+
+
+def main():
+    """Función principal del script. Orquesta el scraping y muestra resultados."""
+    series = scraping_obtener_links_series(hasta_pagina=150)
 
     if not series:
         print("No hay series a para extraer los datos")
