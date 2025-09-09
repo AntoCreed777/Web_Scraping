@@ -18,6 +18,21 @@ class SerieColumn(Enum):
     DONDE_VER = "donde_ver"
 
 
+class SerieNullValues(Enum):
+    """Enum para valores nulos por defecto de cada campo"""
+
+    LINK = ""
+    TITULO = "Desconocido"
+    TITULO_ORIGINAL = "Desconocido"
+    GENEROS = "No disponible"
+    CANTIDAD_TEMPORADAS = 0
+    CANTIDAD_EPISODIOS_TOTALES = 0
+    FECHA_EMISION_ORIGINAL = 0
+    FECHA_EMISION_ULTIMA = 0
+    PUNTUACION = None
+    DONDE_VER = "No disponible"
+
+
 @dataclass
 class DatosSerie:
     """Modelo de datos para almacenar información relevante de una serie de TV."""
@@ -35,12 +50,15 @@ class DatosSerie:
     donde_ver: Optional[list[str]] = field(default_factory=list)
 
     def to_dict(self):
-        """Convierte el objeto DatosSerie en un diccionario usando los campos del dataclass."""
+        """Convierte el objeto DatosSerie en un diccionario usando los campos del dataclass y valores nulos del Enum."""
         result = {}
         for field in self.__dataclass_fields__:
             value = getattr(self, field)
+            # Si el valor es None, usa el valor nulo por defecto del Enum
+            if value is None:
+                value = SerieNullValues[field.upper()].value
             if field in (SerieColumn.GENEROS.value, SerieColumn.DONDE_VER.value):
-                value = ", ".join(value) if value else None
+                value = ", ".join(value) if isinstance(value, list) and value else value
             result[field] = value
         return result
 
