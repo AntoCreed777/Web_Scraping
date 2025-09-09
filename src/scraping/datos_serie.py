@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
+import pandas as pd
+
 
 class SerieColumn(Enum):
     LINK = "link"
@@ -19,7 +21,7 @@ class SerieColumn(Enum):
 
 
 class SerieNullValues(Enum):
-    """Enum para valores nulos por defecto de cada campo"""
+    """Enum para valores nulos por defecto de cada campo en DataFrame"""
 
     LINK = ""
     TITULO = "Desconocido"
@@ -29,7 +31,7 @@ class SerieNullValues(Enum):
     CANTIDAD_EPISODIOS_TOTALES = 0
     FECHA_EMISION_ORIGINAL = 0
     FECHA_EMISION_ULTIMA = 0
-    PUNTUACION = None
+    PUNTUACION = pd.NA
     DONDE_VER = "No disponible"
 
 
