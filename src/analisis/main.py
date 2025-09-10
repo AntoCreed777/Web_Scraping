@@ -24,7 +24,9 @@ def respuesta_donde_ver(df: pd.DataFrame):
     conteo = df_exploded[DONDE_VER_SPLIT].value_counts()
     tabla = conteo.reset_index()
     tabla.columns = ["Servicio", "Cantidad"]
-    imprimir_data_frame(tabla, mensaje="Tabla de cantidad de series por servicio de streaming:")
+    imprimir_data_frame(
+        tabla, mensaje="Tabla de cantidad de series por servicio de streaming disponible:"
+    )
 
 
 ###
@@ -313,7 +315,7 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
     df_exploded = df_exploded[df_exploded[GENEROS_SPLIT] == "Animación"]
 
     # Filtrar por series emitidas en 2025
-    df_exploded = df_exploded[df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value] == 2025]
+    df_exploded = df_exploded[df_exploded[SerieColumn.FECHA_EMISION_ORIGINAL.value] == 2025]
 
     # Filtrar por disponibilidad en streaming
     df_exploded = df_exploded[
@@ -328,7 +330,6 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
-            SerieColumn.FECHA_EMISION_ULTIMA.value,
             SerieColumn.DONDE_VER.value,
         ],
     )
@@ -345,7 +346,7 @@ def respuesta_recomendacion(df: pd.DataFrame):
     # Filtrar series de animación emitidas en el último año (2025)
     df_animacion_2025 = df_exploded[
         (df_exploded[GENEROS_SPLIT] == "Animación")
-        & (df_exploded[SerieColumn.FECHA_EMISION_ULTIMA.value] == 2025)
+        & (df_exploded[SerieColumn.FECHA_EMISION_ORIGINAL.value] == 2025)
     ]
 
     # Buscar series que también tengan Acción
@@ -369,7 +370,6 @@ def respuesta_recomendacion(df: pd.DataFrame):
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
-            SerieColumn.FECHA_EMISION_ULTIMA.value,
             SerieColumn.DONDE_VER.value,
         ],
     )
@@ -381,7 +381,6 @@ def respuesta_recomendacion(df: pd.DataFrame):
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
-            SerieColumn.FECHA_EMISION_ULTIMA.value,
             SerieColumn.DONDE_VER.value,
         ],
     )
