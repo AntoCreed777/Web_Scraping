@@ -154,7 +154,8 @@ def extraer_datos_de_serie(serie: DatosSerie):
     """
     try:
         soup = get_soup(link=serie.link)
-    except:
+    except Exception as e:
+        logging.error(f"Error al extraer datos de la serie {serie.link}: {e}")
         return
 
     # Extraer Genero y Sub-Genero
