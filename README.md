@@ -51,6 +51,15 @@ Implementación de un sistema de scraping y análisis de datos sobre series de t
 
 </div>
 
+## ⚠️ Aviso Legal
+
+Este repositorio fue creado con fines educativos como parte de una tarea universitaria.  
+El código de scraping incluido está diseñado únicamente para propósitos de aprendizaje y no debe utilizarse para recopilar datos de forma masiva o sin consentimiento.
+
+Por favor, asegúrate de respetar los Términos de Servicio del sitio web que se scrapea y revisa su archivo `robots.txt` antes de ejecutar este script.
+
+El autor no se hace responsable del mal uso de este código.
+
 ## 📋 Requisitos Previos
 
 - **Sistema operativo:** Linux, macOS, o Windows con WSL
