@@ -1,3 +1,5 @@
+"""Funciones utilitarias para el análisis de series de TV en el proyecto de Web Scraping."""
+
 import os
 import sys
 from typing import Optional
@@ -11,6 +13,7 @@ from src.scraping.const import settings
 
 
 def importar_data_frame() -> pd.DataFrame:
+    """Importa el DataFrame principal desde el archivo pickle configurado."""
     return pd.read_pickle(settings.nombre_archivo_pkl)
 
 
@@ -22,6 +25,7 @@ def imprimir_data_frame(
 ):
     """
     Imprime el DataFrame en formato tabla markdown.
+
     Si se especifica una lista de columnas, solo muestra esas columnas.
     """
     if columnas is not None:
@@ -41,6 +45,7 @@ def imprimir_data_frame(
 
 
 def split_df(df: pd.DataFrame, columna: str) -> tuple[str, pd.DataFrame]:
+    """Separa los valores de una columna en listas y expande el DataFrame para tener una fila por cada elemento."""
     COLUMNA_SPLIT = columna + "_split"
 
     # Separar en listas

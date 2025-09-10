@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def scraping_obtener_links_series(
     desde_pagina: Optional[int] = 1, hasta_pagina: Optional[int] = None
 ) -> list[DatosSerie]:
+    """Obtiene los links de las series de TV desde Sensacine entre las páginas indicadas."""
     series: list[DatosSerie] = []
     link_paginas_a_buscar_base = settings.series_tv_link + "?page="
 

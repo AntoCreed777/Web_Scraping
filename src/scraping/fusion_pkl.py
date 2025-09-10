@@ -1,3 +1,5 @@
+"""Módulo para fusionar archivos pickle de series de TV en el proyecto de Web Scraping."""
+
 import glob
 import os
 import pickle
@@ -7,6 +9,11 @@ from const import settings
 
 
 def main():
+    """
+    Fusiona todos los archivos pickle de series de TV en un solo DataFrame y lo guarda en un archivo.
+
+    Busca archivos que coincidan con el patrón 'series_tv_*_*.pkl', los carga, concatena y guarda el resultado.
+    """
     # Buscar todos los archivos que coincidan con el patrón 'series_tv_*.pkl' en el directorio principal
     directorio_principal = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     patron = os.path.join(directorio_principal, "series_tv_*_*.pkl")

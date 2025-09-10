@@ -1,3 +1,5 @@
+"""Módulo principal de análisis para el proyecto de Web Scraping de series de TV."""
+
 import os
 import sys
 
@@ -17,6 +19,7 @@ from src.scraping.datos_serie import SerieColumn, SerieNullValues
 # ¿Cuántas series pueden verse en cada servicio de streaming según
 # la lista de sensacine?
 def respuesta_donde_ver(df: pd.DataFrame):
+    """Muestra una tabla con la cantidad de series disponibles en cada servicio de streaming."""
     DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
     conteo = df_exploded[DONDE_VER_SPLIT].value_counts()
     tabla = conteo.reset_index()
@@ -29,6 +32,7 @@ def respuesta_donde_ver(df: pd.DataFrame):
 # Ademas, con esta información construya un gráfico de barras.
 # Para esto pueden utilizar la librería **Matplotlib**.
 def respuesta_generos(df: pd.DataFrame):
+    """Analiza y grafica la distribución de géneros en el conjunto de series."""
     GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Contar cuántas veces aparece cada género
@@ -53,6 +57,7 @@ def respuesta_generos(df: pd.DataFrame):
 # y mayor puntaje hecho por usuarios.
 # Muestre solamente nombre, puntaje, cantidad de temporadas y cantidad de episodios
 def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
+    """Muestra una tabla con las 30 series con más de 2 temporadas y mayor puntaje de usuarios."""
     # Filtrar series con más de 2 temporadas
     df_filtrado = df[df[SerieColumn.CANTIDAD_TEMPORADAS.value] > 2]
 
@@ -90,6 +95,7 @@ def respuesta_series_con_mas_temporadas_puntaje(df: pd.DataFrame):
 # series que tengan la mayor puntuación promedio y los 2 generos que tengan
 # la menor puntuación promedio.
 def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
+    """Calcula el puntaje promedio por género y muestra estadísticas descriptivas de los géneros con mayor y menor puntaje."""
     GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Calcular puntaje promedio por género
@@ -141,6 +147,7 @@ def respuesta_puntaje_generos_estadisticas(df: pd.DataFrame):
 # la cantidad de series que se pueden observar en cada uno de ellos y
 # el puntaje por usuario promedio de estas series, redondée a 3 decimales.
 def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
+    """Muestra una tabla con la cantidad de series y el puntaje promedio por servicio de streaming."""
     DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
 
     # Se agrupa por Servicio de Streaming
@@ -172,6 +179,7 @@ def respuesta_streaming_cant_series_puntaje(df: pd.DataFrame):
 # que tengan 2 o más Temporadas, que hayan terminado de emitirse y
 # pueda verse en una plataforma de streaming.
 def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
+    """Filtra y muestra series con puntaje entre 3.5 y 5, género Drama, 2+ temporadas, terminadas y disponibles en streaming."""
     from datetime import datetime
 
     # Filtrar por puntaje
@@ -232,6 +240,7 @@ def respuesta_series_puntuacion_en_limites(df: pd.DataFrame):
 # ¿Cúal es la plataforma de streaming que vale la pena contratar
 # según calidad/cantidad de series de acuerdo con los datos de Sensacine?
 def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
+    """Calcula y muestra la mejor plataforma de streaming según calidad y cantidad de series."""
     DONDE_VER_SPLIT, df_exploded = split_df(df, SerieColumn.DONDE_VER.value)
 
     df_exploded = df_exploded[
@@ -292,6 +301,7 @@ def respuesta_mejor_plataforma_streaming(df: pd.DataFrame):
 # sido emitidas durante el ultimo año (2025) y pueda verse en una
 # plataforma de streaming.
 def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
+    """Muestra series de animación con puntaje entre 4 y 5, emitidas en el último año y disponibles en streaming."""
     # Filtrar por puntaje
     df_filtrado = df[
         (df[SerieColumn.PUNTUACION.value] >= 4) & (df[SerieColumn.PUNTUACION.value] <= 5)
@@ -329,6 +339,7 @@ def respuesta_series_puntaje_4_5_animacion_ultimo_ano_ver(df: pd.DataFrame):
 # recomendarias a un fan de la acción?
 # ¿Para un fan de la comedia?
 def respuesta_recomendacion(df: pd.DataFrame):
+    """Recomienda series de animación recientes para fans de acción y comedia."""
     GENEROS_SPLIT, df_exploded = split_df(df, SerieColumn.GENEROS.value)
 
     # Filtrar series de animación emitidas en el último año (2025)
@@ -380,6 +391,7 @@ def respuesta_recomendacion(df: pd.DataFrame):
 # Entregue una tabla con series con la serie mejor evaluada
 # por cada año segun su fecha original de emisión.
 def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
+    """Muestra la serie mejor evaluada por cada año de emisión original."""
     from datetime import datetime
 
     # Agrupar por año de emisión original y obtener la serie con mayor puntaje en cada año
@@ -419,6 +431,7 @@ def respuesta_series_mejor_evaluadas_por_anio(df: pd.DataFrame):
 # Presente un histograma con el puntaje promedio de
 # las series estrenadas durante ese año por cada año.
 def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
+    """Presenta un histograma con el puntaje promedio de las series estrenadas por año."""
     from datetime import datetime
 
     df_filtrado = df[
@@ -451,6 +464,7 @@ def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
 
 
 def main():
+    """Ejecuta el análisis principal sobre el DataFrame de series de TV."""
     df = importar_data_frame()
 
     print("\nParte 2.1")

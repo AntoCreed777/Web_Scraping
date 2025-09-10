@@ -8,6 +8,8 @@ import pandas as pd
 
 
 class SerieColumn(Enum):
+    """Enum con los nombres de las columnas del DataFrame de series de TV."""
+
     LINK = "link"
     TITULO = "titulo"
     TITULO_ORIGINAL = "titulo_original"
@@ -21,7 +23,7 @@ class SerieColumn(Enum):
 
 
 class SerieNullValues(Enum):
-    """Enum para valores nulos por defecto de cada campo en DataFrame"""
+    """Enum para valores nulos por defecto de cada campo en DataFrame."""
 
     LINK = ""
     TITULO = "Desconocido"

@@ -105,6 +105,7 @@ def extraer_fecha_emision(info) -> tuple[int | None, int | None]:
 
 
 def extraer_puntuacion(soup: BeautifulSoup) -> float | None:
+    """Extrae el puntaje de usuarios desde el objeto BeautifulSoup proporcionado."""
     divs = soup.find_all("div", class_="rating-item-content")
     if not divs:
         return None
