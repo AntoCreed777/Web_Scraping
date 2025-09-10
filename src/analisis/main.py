@@ -366,7 +366,7 @@ def respuesta_recomendacion(df: pd.DataFrame):
     # Mostrar recomendación para fans de acción
     imprimir_data_frame(
         df_accion_sorted,
-        mensaje="Recomendación de series de animación recientes para fans de la acción (ordenadas por puntaje):",
+        mensaje="Recomendación de series de animación recientes emitidas en el 2025 para fans de la acción (ordenadas por puntaje):",
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
@@ -377,7 +377,7 @@ def respuesta_recomendacion(df: pd.DataFrame):
     # Mostrar recomendación para fans de comedia
     imprimir_data_frame(
         df_comedia_sorted,
-        mensaje="Recomendación de series de animación recientes para fans de la comedia (ordenadas por puntaje):",
+        mensaje="Recomendación de series de animación recientes emitidas en el 2025 para fans de la comedia (ordenadas por puntaje):",
         columnas=[
             SerieColumn.TITULO.value,
             SerieColumn.PUNTUACION.value,
@@ -455,7 +455,7 @@ def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
     plt.xlabel("Año")
     plt.ylabel("Puntaje promedio")
     plt.title("Puntaje promedio de series estrenadas por año")
-    plt.xticks(anios, rotation=45)
+    plt.xticks(anios, rotation=90)
     plt.tight_layout()
     # plt.show()
     plt.savefig("puntaje_promedio_por_año.png")
@@ -465,6 +465,8 @@ def respuesta_puntaje_promedio_por_anio(df: pd.DataFrame):
 def main():
     """Ejecuta el análisis principal sobre el DataFrame de series de TV."""
     df = importar_data_frame()
+
+    df = df.drop_duplicates()
 
     print("\nParte 2.1")
     respuesta_donde_ver(df)
