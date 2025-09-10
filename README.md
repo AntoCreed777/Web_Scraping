@@ -17,6 +17,7 @@ Implementación de un sistema de scraping y análisis de datos sobre series de t
     - [Herramientas de desarrollo y control de versiones](#herramientas-de-desarrollo-y-control-de-versiones)
     - [Testing, Linting y Tipado](#testing-linting-y-tipado)
     - [Integración continua](#integración-continua)
+  - [⚠️ Aviso Legal](#️-aviso-legal)
   - [📋 Requisitos Previos](#-requisitos-previos)
   - [🚀 Cómo ejecutar y probar el proyecto](#-cómo-ejecutar-y-probar-el-proyecto)
     - [1. Instalar pdm (si no lo tienes)](#1-instalar-pdm-si-no-lo-tienes)
@@ -30,6 +31,7 @@ Implementación de un sistema de scraping y análisis de datos sobre series de t
   - [📓 Jupyter Notebook](#-jupyter-notebook)
   - [📥 Descarga por rangos de páginas y fusión de datos](#-descarga-por-rangos-de-páginas-y-fusión-de-datos)
   - [📝 Convenciones y Herramientas de Formato](#-convenciones-y-herramientas-de-formato)
+  - [📄 Licencia](#-licencia)
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -161,6 +163,10 @@ Posteriormente, el proyecto incluye código para fusionar todos los archivos des
 - Se utiliza **isort** para ordenar los imports de manera consistente.
 - Se utiliza **pydocstyle** para verificar la calidad y formato de los docstrings.
 - Se incluyen comentarios claros y docstrings en las funciones y clases principales para facilitar la comprensión y el mantenimiento.
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
