@@ -45,6 +45,9 @@ def scraping_obtener_links_series(
             break
 
         if not series_en_pagina:
+            logging.error(
+                f"No hay series en la pagina actual.\tSe asume que en las siguientes tampoco habra mas."
+            )
             break
 
         if series_en_pagina_anterior is not None and series_en_pagina_anterior == series_en_pagina:
